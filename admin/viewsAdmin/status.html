@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Status Lapangan</title>
+  <link rel="stylesheet" href="/publicAdmin/css/admin.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1><i class="fas fa-clipboard-list"></i> Status Lapangan</h1>
+    </div>
+  </header>
+
+  <nav class="navbar">
+    <div class="container">
+      <ul>
+        <li><a href="/admin/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+        <li><a href="/admin/ubahjadwal"><i class="fas fa-calendar-alt"></i> Ubah Jadwal</a></li>
+        <li><a href="/admin/status" class="active"><i class="fas fa-clipboard-list"></i> Status Lapangan</a></li>
+        <li><a href="/admin/riwayat"><i class="fas fa-history"></i> Riwayat Pemesanan</a></li>
+        <li><a href="/admin/verifikasi"><i class="fas fa-check-circle"></i> Verifikasi Pembayaran</a></li>
+        <li><a href="/admin/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="container">
+    <a href="/admin/dashboard" class="back-btn">
+      <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
+    </a>
+
+    <div class="filter-section">
+      <div class="form-group">
+        <label for="filter-date">Tanggal:</label>
+        <input type="date" id="filter-date" value="${new Date().toISOString().split('T')[0]}">
+      </div>
+      <button id="refresh-btn" class="btn">
+        <i class="fas fa-sync-alt"></i> Refresh
+      </button>
+    </div>
+    
+    <div id="fields-status" class="fields-grid">
+      <!-- Field status cards akan diisi oleh JavaScript -->
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2023 Sistem Pemesanan Lapangan Olahraga</p>
+    </div>
+  </footer>
+
+  <script>
+    // Fungsi untuk memuat status lapangan
+    async function loadFieldsStatus() {
+      const date = document.getElementById('filter-date').value;
+      
+      try {
+        const response = await fetch(`/api/admin/fields/status?date=${date}`);
+        const data = await response.json();
+        
+        const container = document.getElementById('fields-status');
+        container.innerHTML = '';
+        
+        data.forEach(field => {
+          const fieldCard = document.createElement('div');
+          fieldCard.className = 'field-card';
+          
+          let timeSlotsHTML = '';
+          field.time_slots.forEach(slot => {
+            timeSlotsHTML += `
+              <div class="time-slot ${slot.status}">
+                <span>${slot.time}</span>
+                <span class="slot-status">${slot.status === 'available' ? 'Tersedia' : 'Dipesan'}</span>
+                ${slot.booking_id ? `<span class="booking-code">${slot.booking_code}</span>` : ''}
+              </div>
+            `;
+          });
+          
+          fieldCard.innerHTML = `
+            <div class="field-header">
+              <h3>${field.name}</h3>
+              <span class="field-type">${field.type}</span>
+            </div>
+            <div class="time-slots">
+              ${timeSlotsHTML}
+            </div>
+          `;
+          
+          container.appendChild(fieldCard);
+        });
+      } catch (error) {
+        console.error('Gagal memuat status lapangan:', error);
+      }
+    }
+    
+    // Event listener untuk tombol refresh
+    document.getElementById('refresh-btn').addEventListener('click', loadFieldsStatus);
+    
+    // Event listener untuk perubahan tanggal
+    document.getElementById('filter-date').addEventListener('change', loadFieldsStatus);
+    
+    // Muat data awal saat halaman dimuat
+    window.addEventListener('DOMContentLoaded', loadFieldsStatus);
+  </script>
+</body>
+</html>

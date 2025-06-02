@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ubah Jadwal Lapangan</title>
+  <link rel="stylesheet" href="/publicAdmin/css/admin.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1><i class="fas fa-calendar-alt"></i> Ubah Jadwal Lapangan</h1>
+    </div>
+  </header>
+
+  <nav class="navbar">
+    <div class="container">
+      <ul>
+        <li><a href="/admin/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+        <li><a href="/admin/ubahjadwal" class="active"><i class="fas fa-calendar-alt"></i> Ubah Jadwal</a></li>
+        <li><a href="/admin/status"><i class="fas fa-clipboard-list"></i> Status Lapangan</a></li>
+        <li><a href="/admin/riwayat"><i class="fas fa-history"></i> Riwayat Pemesanan</a></li>
+        <li><a href="/admin/verifikasi"><i class="fas fa-check-circle"></i> Verifikasi Pembayaran</a></li>
+        <li><a href="/admin/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="container">
+    <a href="/admin/dashboard" class="back-btn">
+      <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
+    </a>
+
+    <div class="form-container">
+      <form id="scheduleForm">
+        <div class="form-group">
+          <label for="field">Lapangan:</label>
+          <select id="field" name="field_id" required>
+            <option value="">-- Pilih Lapangan --</option>
+            <!-- Options akan diisi oleh JavaScript -->
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="date">Tanggal:</label>
+          <input type="date" id="date" name="date" required>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="start_time">Waktu Mulai:</label>
+            <select id="start_time" name="start_time" required>
+              <option value="">-- Pilih Waktu --</option>
+              <!-- Options akan diisi oleh JavaScript -->
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="end_time">Waktu Selesai:</label>
+            <select id="end_time" name="end_time" required>
+              <option value="">-- Pilih Waktu --</option>
+              <!-- Options akan diisi oleh JavaScript -->
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="price">Harga per Jam (Rp):</label>
+          <input type="number" id="price" name="price" min="0" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="status">Status:</label>
+          <select id="status" name="status" required>
+            <option value="available">Tersedia</option>
+            <option value="maintenance">Maintenance</option>
+          </select>
+        </div>
+        
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> Simpan Perubahan
+          </button>
+          <button type="button" id="resetBtn" class="btn btn-secondary">
+            <i class="fas fa-undo"></i> Reset
+          </button>
+        </div>
+      </form>
+    </div>
+    
+    <div class="current-schedule">
+      <h3>Jadwal Saat Ini</h3>
+      <div id="schedule-list">
+        <!-- Daftar jadwal akan diisi oleh JavaScript -->
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2023 Sistem Pemesanan Lapangan Olahraga</p>
+    </div>
+  </footer>
+
+  <script>
+    // Fungsi untuk memuat daftar lapangan
+    async function loadFields() {
+      try {
+        const response = await fetch('/api/admin/fields');
+        const fields = await response.json();
+        
+        const fieldSelect = document.getElementById('field');
+        fieldSelect.innerHTML = '<option value="">-- Pilih Lapangan --</option>';
+        
+        fields.forEach(field => {
+          const option = document.createElement('option');
+          option.value = field.id;
+          option.textContent = `${field.name} (${field.type})`;
+          fieldSelect.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Gagal memuat daftar lapangan:', error);
+      }
+    }
+    
+    // Fungsi untuk memuat waktu yang tersedia
+    function loadTimeOptions() {
+      const startSelect = document.getElementById('start_time');
+      const endSelect = document.getElementById('end_time');
+      
+      startSelect.innerHTML = '<option value="">-- Pilih Waktu --</option>';
+      endSelect.innerHTML = '<option value="">-- Pilih Waktu --</option>';
+      
+      // Buat pilihan waktu dari jam 8 pagi sampai 10 malam
+      for (let hour = 8; hour <= 22; hour++) {
+        const time = `${hour.toString().padStart(2, '0')}:00`;
+        const option1 = document.createElement('option');
+        option1.value = time;
+        option1.textContent = time;
+        
+        const option2 = document.createElement('option');
+        option2.value = time;
+        option2.textContent = time;
+        
+        startSelect.appendChild(option1);
+        endSelect.appendChild(option2);
+      }
+    }
+    
+    // Fungsi untuk memuat jadwal saat ini
+    async function loadCurrentSchedule(fieldId = null, date = null) {
+      try {
+        let url = '/api/admin/schedules';
+        if (fieldId && date) {
+          url += `?field_id=${fieldId}&date=${date}`;
+        }
+        
+        const response = await fetch(url);
+        const schedules = await response.json();
+        
+        const scheduleList = document.getElementById('schedule-list');
+        scheduleList.innerHTML = '';
+        
+        if (schedules.length === 0) {
+          scheduleList.innerHTML = '<p>Tidak ada jadwal untuk kriteria ini</p>';
+          return;
+        }
+        
+        schedules.forEach(schedule => {
+          const scheduleItem = document.createElement('div');
+          scheduleItem.className = 'schedule-item';
+          scheduleItem.innerHTML = `
+            <div class="schedule-info">
+              <span class="schedule-time">${schedule.start_time} - ${schedule.end_time}</span>
+              <span class="schedule-price">Rp${schedule.price.toLocaleString('id-ID')}</span>
+              <span class="schedule-status ${schedule.status}">${schedule.status === 'available' ? 'Tersedia' : 'Maintenance'}</span>
+            </div>
+            <div class="schedule-actions">
+              <button class="btn btn-sm btn-edit" data-id="${schedule.id}">
+                <i class="fas fa-edit"></i> Edit
+              </button>
+              <button class="btn btn-sm btn-danger" data-id="${schedule.id}">
+                <i class="fas fa-trash"></i> Hapus
+              </button>
+            </div>
+          `;
+          scheduleList.appendChild(scheduleItem);
+        });
+      } catch (error) {
+        console.error('Gagal memuat jadwal:', error);
+      }
+    }
+    
+    // Event listener untuk form
+    document.getElementById('scheduleForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+      
+      try {
+        const response = await fetch('/api/admin/schedules', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+          alert('Jadwal berhasil disimpan');
+          this.reset();
+          loadCurrentSchedule(data.field_id, data.date);
+        } else {
+          const error = await response.json();
+          alert(error.message || 'Gagal menyimpan jadwal');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat menyimpan jadwal');
+      }
+    });
+    
+    // Event listener untuk tombol reset
+    document.getElementById('resetBtn').addEventListener('click', function() {
+      document.getElementById('scheduleForm').reset();
+    });
+    
+    // Event listener untuk perubahan lapangan atau tanggal
+    document.getElementById('field').addEventListener('change', function() {
+      const fieldId = this.value;
+      const date = document.getElementById('date').value;
+      if (fieldId && date) {
+        loadCurrentSchedule(fieldId, date);
+      }
+    });
+    
+    document.getElementById('date').addEventListener('change', function() {
+      const fieldId = document.getElementById('field').value;
+      const date = this.value;
+      if (fieldId && date) {
+        loadCurrentSchedule(fieldId, date);
+      }
+    });
+    
+    // Muat data awal saat halaman dimuat
+    window.addEventListener('DOMContentLoaded', () => {
+      loadFields();
+      loadTimeOptions();
+      
+      // Set tanggal default ke hari ini
+      document.getElementById('date').valueAsDate = new Date();
+    });
+  </script>
+</body>
+</html>

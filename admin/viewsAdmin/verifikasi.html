@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verifikasi Pembayaran</title>
+  <link rel="stylesheet" href="/publicAdmin/css/admin.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1><i class="fas fa-check-circle"></i> Verifikasi Pembayaran</h1>
+    </div>
+  </header>
+
+  <nav class="navbar">
+    <div class="container">
+      <ul>
+        <li><a href="/admin/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+        <li><a href="/admin/ubahjadwal"><i class="fas fa-calendar-alt"></i> Ubah Jadwal</a></li>
+        <li><a href="/admin/status"><i class="fas fa-clipboard-list"></i> Status Lapangan</a></li>
+        <li><a href="/admin/riwayat"><i class="fas fa-history"></i> Riwayat Pemesanan</a></li>
+        <li><a href="/admin/verifikasi" class="active"><i class="fas fa-check-circle"></i> Verifikasi Pembayaran</a></li>
+        <li><a href="/admin/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div id="verification-container">
+      <!-- Konten akan diisi oleh JavaScript -->
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2023 Sistem Pemesanan Lapangan Olahraga</p>
+    </div>
+  </footer>
+
+  <script>
+    // Fungsi untuk memuat detail pembayaran
+    async function loadPaymentDetails() {
+      const params = new URLSearchParams(window.location.search);
+      const bookingId = params.get('id');
+      
+      if (!bookingId) {
+        window.location.href = '/admin/riwayat';
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/api/admin/bookings/${bookingId}/payment`);
+        const data = await response.json();
+        
+        const container = document.getElementById('verification-container');
+        
+        if (!data) {
+          container.innerHTML = `
+            <div class="alert alert-info">
+              <i class="fas fa-info-circle"></i> Tidak ditemukan data pembayaran untuk pemesanan ini
+            </div>
+            <a href="/admin/riwayat" class="btn">
+              <i class="fas fa-arrow-left"></i> Kembali ke Riwayat
+            </a>
+          `;
+          return;
+        }
+        
+        container.innerHTML = `
+          <div class="payment-details">
+            <div class="payment-header">
+              <h3>Detail Pemesanan</h3>
+              <span class="booking-code">Kode: ${data.booking_code}</span>
+            </div>
+            
+            <div class="payment-info">
+              <div class="info-row">
+                <span class="info-label">Nama Pemesan:</span>
+                <span class="info-value">${data.user_name}</span>
+              </div>
+              
+              <div class="info-row">
+                <span class="info-label">Lapangan:</span>
+                <span class="info-value">${data.field_name} (${data.field_type})</span>
+              </div>
+              
+              <div class="info-row">
+                <span class="info-label">Tanggal & Waktu:</span>
+                <span class="info-value">
+                  ${new Date(data.booking_date).toLocaleDateString('id-ID')} | 
+                  ${data.start_time} - ${data.end_time}
+                </span>
+              </div>
+              
+              <div class="info-row">
+                <span class="info-label">Total Pembayaran:</span>
+                <span class="info-value">Rp${data.total_price.toLocaleString('id-ID')}</span>
+              </div>
+              
+              <div class="info-row">
+                <span class="info-label">Status:</span>
+                <span class="info-value status-badge ${data.status}">
+                  ${getStatusText(data.status)}
+                </span>
+              </div>
+            </div>
+            
+            <div class="payment-proof">
+              <h4>Bukti Pembayaran</h4>
+              <img src="/uploads/${data.payment_proof}" alt="Bukti Pembayaran">
+            </div>
+            
+            <div class="verification-actions">
+              ${data.status === 'paid' ? `
+                <button id="approveBtn" class="btn btn-success">
+                  <i class="fas fa-check"></i> Setujui Pembayaran
+                </button>
+                <button id="rejectBtn" class="btn btn-danger">
+                  <i class="fas fa-times"></i> Tolak Pembayaran
+                </button>
+              ` : ''}
+              
+              <a href="/admin/riwayat" class="btn">
+                <i class="fas fa-arrow-left"></i> Kembali ke Riwayat
+              </a>
+            </div>
+          </div>
+        `;
+        
+        // Tambahkan event listener untuk tombol aksi
+        if (data.status === 'paid') {
+          document.getElementById('approveBtn').addEventListener('click', () => verifyPayment(true));
+          document.getElementById('rejectBtn').addEventListener('click', () => verifyPayment(false));
+        }
+      } catch (error) {
+        console.error('Gagal memuat detail pembayaran:', error);
+      }
+    }
+    
+    // Fungsi untuk verifikasi pembayaran
+    async function verifyPayment(approved) {
+      const params = new URLSearchParams(window.location.search);
+      const bookingId = params.get('id');
+      
+      if (!confirm(`Apakah Anda yakin ingin ${approved ? 'menyetujui' : 'menolak'} pembayaran ini?`)) {
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/api/admin/bookings/${bookingId}/verify`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ approved })
+        });
+        
+        if (response.ok) {
+          alert(`Pembayaran berhasil ${approved ? 'disetujui' : 'ditolak'}`);
+          loadPaymentDetails(); // Refresh data
+        } else {
+          const error = await response.json();
+          alert(error.message || 'Gagal memverifikasi pembayaran');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat memverifikasi pembayaran');
+      }
+    }
+    
+    // Fungsi untuk mendapatkan teks status
+    function getStatusText(status) {
+      const statusMap = {
+        'pending': 'Menunggu Pembayaran',
+        'paid': 'Sudah Bayar (Verifikasi)',
+        'confirmed': 'Terkonfirmasi',
+        'cancelled': 'Dibatalkan'
+      };
+      return statusMap[status] || status;
+    }
+    
+    // Muat data saat halaman dimuat
+    window.addEventListener('DOMContentLoaded', loadPaymentDetails);
+  </script>
+</body>
+</html>
