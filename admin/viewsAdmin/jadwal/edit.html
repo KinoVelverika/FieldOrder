@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Jadwal</title>
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 id="formTitle">Tambah Jadwal</h1>
+      <a href="list.html" class="btn btn-outline">Kembali</a>
+    </div>
+    
+    <div class="card">
+      <form id="scheduleForm">
+        <input type="hidden" id="scheduleId">
+        
+        <div class="form-group">
+          <label for="field" class="form-label">Lapangan</label>
+          <select id="field" class="form-control" required>
+            <option value="">Pilih Lapangan</option>
+            <option value="1">Lapangan 1</option>
+            <option value="2">Lapangan 2</option>
+            <option value="3">Lapangan 3</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="day" class="form-label">Hari</label>
+          <select id="day" class="form-control" required>
+            <option value="">Pilih Hari</option>
+            <option value="Senin">Senin</option>
+            <option value="Selasa">Selasa</option>
+            <option value="Rabu">Rabu</option>
+            <option value="Kamis">Kamis</option>
+            <option value="Jumat">Jumat</option>
+            <option value="Sabtu">Sabtu</option>
+            <option value="Minggu">Minggu</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="startTime" class="form-label">Waktu Mulai</label>
+          <input type="time" id="startTime" class="form-control" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="endTime" class="form-label">Waktu Selesai</label>
+          <input type="time" id="endTime" class="form-control" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="price" class="form-label">Harga (Rp)</label>
+          <input type="number" id="price" class="form-control" required>
+        </div>
+        
+        <div class="form-group" style="margin-top: 30px;">
+          <button type="submit" class="btn btn-primary">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script src="../js/admin.js"></script>
+  <script>
+    // Load data jika dalam mode edit
+    const urlParams = new URLSearchParams(window.location.search);
+    const scheduleId = urlParams.get('id');
+    
+    if(scheduleId) {
+      document.getElementById('formTitle').textContent = 'Edit Jadwal';
+      document.getElementById('scheduleId').value = scheduleId;
+      
+      fetch(`/api/admin/schedules/${scheduleId}`)
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('field').value = data.field_id;
+          document.getElementById('day').value = data.day;
+          document.getElementById('startTime').value = data.start_time;
+          document.getElementById('endTime').value = data.end_time;
+          document.getElementById('price').value = data.price;
+        });
+    }
+    
+    // Handle form submission
+    document.getElementById('scheduleForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const formData = {
+        field_id: document.getElementById('field').value,
+        day: document.getElementById('day').value,
+        start_time: document.getElementById('startTime').value,
+        end_time: document.getElementById('endTime').value,
+        price: document.getElementById('price').value
+      };
+      
+      const url = scheduleId 
+        ? `/api/admin/schedules/${scheduleId}`
+        : '/api/admin/schedules';
+      
+      const method = scheduleId ? 'PUT' : 'POST';
+      
+      fetch(url, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      })
+      .then(response => {
+        if(response.ok) {
+          alert('Jadwal berhasil disimpan!');
+          window.location.href = 'list.html';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

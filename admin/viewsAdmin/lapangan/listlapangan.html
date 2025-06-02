@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Status Lapangan</title>
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Status Lapangan</h1>
+    </div>
+    
+    <div class="card-grid" id="fieldStatusContainer">
+      <!-- Data akan diisi oleh JavaScript -->
+    </div>
+  </div>
+  <script src="../js/admin.js"></script>
+  <script>
+    function loadFieldStatus() {
+      fetch('/api/admin/fields/status')
+        .then(response => response.json())
+        .then(data => {
+          renderFieldStatus(data);
+        });
+    }
+    
+    function renderFieldStatus(fields) {
+      const container = document.getElementById('fieldStatusContainer');
+      container.innerHTML = '';
+      
+      fields.forEach(field => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <h2>${field.name}</h2>
+          <div style="margin-top: 15px;">
+            ${renderBookingList(field.bookings)}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+    
+    function renderBookingList(bookings) {
+      if(bookings.length === 0) {
+        return '<p>Tidak ada booking</p>';
+      }
+      
+      let html = '<div style="margin-top: 10px;">';
+      bookings.forEach(booking => {
+        html += `
+          <div style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
+            <div style="display: flex; justify-content: space-between;">
+              <span>${booking.day}, ${booking.start_time}-${booking.end_time}</span>
+              <span class="badge ${booking.status === 'approved' ? 'badge-approved' : 'badge-pending'}">
+                ${booking.status === 'approved' ? 'Dibooking' : 'Menunggu'}
+              </span>
+            </div>
+            <div style="font-size: 0.9em; color: #666;">
+              ${booking.customer_name || '-'}
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      return html;
+    }
+    
+    // Load data awal
+    loadFieldStatus();
+    
+    // Auto-refresh setiap 1 menit
+    setInterval(loadFieldStatus, 60000);
+  </script>
+</body>
+</html>

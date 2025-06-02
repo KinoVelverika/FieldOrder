@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daftar Pesanan</title>
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Daftar Pesanan</h1>
+      <div>
+        <select id="filterStatus" class="form-control" style="width: auto; display: inline-block;">
+          <option value="all">Semua Status</option>
+          <option value="pending">Menunggu</option>
+          <option value="approved">Disetujui</option>
+          <option value="rejected">Ditolak</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="list-container">
+      <div id="orderList">
+        <!-- Data akan diisi oleh JavaScript -->
+      </div>
+    </div>
+  </div>
+  <script src="../js/admin.js"></script>
+  <script>
+    function loadOrderList() {
+      const status = document.getElementById('filterStatus').value;
+      
+      fetch(`/api/admin/orders?status=${status}`)
+        .then(response => response.json())
+        .then(data => {
+          renderOrderList(data);
+        });
+    }
+    
+    function renderOrderList(orders) {
+      const container = document.getElementById('orderList');
+      container.innerHTML = '';
+      
+      if(orders.length === 0) {
+        container.innerHTML = '<p style="text-align: center; padding: 20px;">Tidak ada pesanan</p>';
+        return;
+      }
+      
+      orders.forEach(order => {
+        const item = document.createElement('a');
+        item.href = `detail.html?id=${order.id}`;
+        item.className = `list-item ${order.status === 'pending' ? 'highlight-item' : ''}`;
+        item.innerHTML = `
+          <div>
+            <h3>${order.order_code}</h3>
+            <p>${order.field_name} • ${order.day}, ${order.start_time}-${order.end_time}</p>
+          </div>
+          <div>
+            <span class="badge ${getStatusBadgeClass(order.status)}">
+              ${getStatusText(order.status)}
+            </span>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+    
+    function getStatusBadgeClass(status) {
+      switch(status) {
+        case 'pending': return 'badge-pending';
+        case 'approved': return 'badge-approved';
+        case 'rejected': return 'badge-danger';
+        default: return '';
+      }
+    }
+    
+    function getStatusText(status) {
+      switch(status) {
+        case 'pending': return 'Menunggu';
+        case 'approved': return 'Disetujui';
+        case 'rejected': return 'Ditolak';
+        default: return status;
+      }
+    }
+    
+    // Load data saat filter berubah
+    document.getElementById('filterStatus').addEventListener('change', loadOrderList);
+    
+    // Load data awal
+    loadOrderList();
+  </script>
+</body>
+</html>

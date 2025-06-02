@@ -40,3 +40,26 @@ header {
 .btn:hover {
   background-color: var(--dark-green);
 }
+
+/* Warna default */
+.btn-riwayat {
+  background-color: #4CAF50; /* Hijau */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* Warna saat ada pesanan baru */
+.btn-riwayat.new-order {
+  background-color: #FF5722; /* Oranye */
+  animation: blink 1.5s infinite;
+}
+
+/* Animasi kedip */
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}

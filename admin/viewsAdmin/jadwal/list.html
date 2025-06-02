@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kelola Jadwal</title>
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Kelola Jadwal</h1>
+      <a href="edit.html" class="btn btn-primary">+ Tambah Jadwal</a>
+    </div>
+    
+    <div class="list-container">
+      <div id="scheduleList">
+        <!-- Data akan diisi oleh JavaScript -->
+      </div>
+    </div>
+  </div>
+  <script src="../js/admin.js"></script>
+  <script>
+    function loadScheduleList() {
+      fetch('/api/admin/schedules')
+        .then(response => response.json())
+        .then(data => {
+          renderScheduleList(data);
+        });
+    }
+    
+    function renderScheduleList(schedules) {
+      const container = document.getElementById('scheduleList');
+      container.innerHTML = '';
+      
+      if(schedules.length === 0) {
+        container.innerHTML = '<p style="text-align: center; padding: 20px;">Belum ada jadwal</p>';
+        return;
+      }
+      
+      schedules.forEach(schedule => {
+        const item = document.createElement('div');
+        item.className = 'list-item';
+        item.innerHTML = `
+          <div>
+            <h3>${schedule.field_name}</h3>
+            <p>${schedule.day}, ${schedule.start_time} - ${schedule.end_time}</p>
+          </div>
+          <div>
+            <span style="font-weight: bold;">Rp ${schedule.price.toLocaleString()}</span>
+            <div style="display: flex; gap: 10px; margin-top: 5px;">
+              <a href="edit.html?id=${schedule.id}" class="btn btn-outline">Edit</a>
+              <button class="btn btn-danger" onclick="deleteSchedule(${schedule.id})">Hapus</button>
+            </div>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+    
+    function deleteSchedule(id) {
+      if(confirm('Apakah Anda yakin ingin menghapus jadwal ini?')) {
+        fetch(`/api/admin/schedules/${id}`, {
+          method: 'DELETE'
+        })
+        .then(response => {
+          if(response.ok) {
+            loadScheduleList();
+          }
+        });
+      }
+    }
+    
+    // Load data awal
+    loadScheduleList();
+  </script>
+</body>
+</html>

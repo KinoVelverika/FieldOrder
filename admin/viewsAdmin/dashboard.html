@@ -3,103 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Admin</title>
-  <link rel="stylesheet" href="/publicAdmin/css/admin.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="css/admin.css">
 </head>
 <body>
-  <header>
-    <div class="container">
-      <h1><i class="fas fa-user-shield"></i> Dashboard Admin</h1>
+  <div class="container">
+    <div class="header">
+      <h1>Dashboard Admin</h1>
+      <button id="logoutBtn" class="btn btn-outline">Logout</button>
     </div>
-  </header>
-
-  <nav class="navbar">
-    <div class="container">
-      <ul>
-        <li><a href="/admin/dashboard" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-        <li><a href="/admin/ubahjadwal"><i class="fas fa-calendar-alt"></i> Ubah Jadwal</a></li>
-        <li><a href="/admin/status"><i class="fas fa-clipboard-list"></i> Status Lapangan</a></li>
-        <li><a href="/admin/riwayat"><i class="fas fa-history"></i> Riwayat Pemesanan</a></li>
-        <li><a href="/admin/verifikasi"><i class="fas fa-check-circle"></i> Verifikasi Pembayaran</a></li>
-        <li><a href="/admin/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-      </ul>
-    </div>
-  </nav>
-
-  <main class="container">
-    <a href="/admin" class="back-btn">
-      <i class="fas fa-arrow-left"></i> Kembali ke Login
-    </a>
-
-    <h2>Ringkasan Sistem</h2>
     
-    <div class="summary-cards">
-      <div class="summary-card">
-        <i class="fas fa-calendar-check"></i>
-        <h3>Pemesanan Hari Ini</h3>
-        <p id="today-bookings">0</p>
-      </div>
+    <div class="card-grid">
+      <a href="pesanan/list.html" class="card" id="ordersCard">
+        <div class="card-icon">📋</div>
+        <h2>Pesanan</h2>
+        <p id="pendingOrdersCount">0</p>
+        <p>Menunggu Verifikasi</p>
+        <span class="badge badge-new" id="pendingOrdersBadge" style="display: none;">0</span>
+      </a>
       
-      <div class="summary-card">
-        <i class="fas fa-clock"></i>
-        <h3>Menunggu Verifikasi</h3>
-        <p id="pending-payments">0</p>
-      </div>
+      <a href="jadwal/list.html" class="card">
+        <div class="card-icon">📅</div>
+        <h2>Jadwal</h2>
+        <p>Kelola Ketersediaan</p>
+      </a>
       
-      <div class="summary-card">
-        <i class="fas fa-check-circle"></i>
-        <h3>Pemesanan Selesai</h3>
-        <p id="completed-bookings">0</p>
+      <a href="lapangan/list.html" class="card">
+        <div class="card-icon">⚽</div>
+        <h2>Lapangan</h2>
+        <p id="totalFields">0</p>
+        <p>Total Lapangan</p>
+      </a>
+      
+      <div class="card">
+        <div class="card-icon">👥</div>
+        <h2>Booking Hari Ini</h2>
+        <p id="todayBookings">0</p>
+        <p>Pemesanan</p>
       </div>
     </div>
-    
-    <div class="recent-activity">
-      <h3>Aktivitas Terkini</h3>
-      <div id="activity-list">
-        <!-- Akan diisi oleh JavaScript -->
-      </div>
-    </div>
-  </main>
-
-  <footer>
-    <div class="container">
-      <p>&copy; 2023 Sistem Pemesanan Lapangan Olahraga</p>
-    </div>
-  </footer>
-
-  <script>
-    // Fungsi untuk mengambil data dari API
-    async function loadDashboardData() {
-      try {
-        const response = await fetch('/api/admin/dashboard');
-        const data = await response.json();
-        
-        // Update summary cards
-        document.getElementById('today-bookings').textContent = data.today_bookings;
-        document.getElementById('pending-payments').textContent = data.pending_payments;
-        document.getElementById('completed-bookings').textContent = data.completed_bookings;
-        
-        // Update activity list
-        const activityList = document.getElementById('activity-list');
-        activityList.innerHTML = '';
-        
-        data.recent_activities.forEach(activity => {
-          const activityItem = document.createElement('div');
-          activityItem.className = 'activity-item';
-          activityItem.innerHTML = `
-            <p><strong>${activity.description}</strong></p>
-            <small>${new Date(activity.created_at).toLocaleString()}</small>
-          `;
-          activityList.appendChild(activityItem);
-        });
-      } catch (error) {
-        console.error('Gagal memuat data dashboard:', error);
-      }
-    }
-    
-    // Panggil fungsi saat halaman dimuat
-    window.addEventListener('DOMContentLoaded', loadDashboardData);
-  </script>
+  </div>
+  <script src="js/admin.js"></script>
 </body>
 </html>
