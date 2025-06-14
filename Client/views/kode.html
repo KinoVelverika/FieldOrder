@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cek Kode Pemesanan</title>
+  <link rel="stylesheet" href="/public/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #2e7d32;
+      --secondary-color: #4caf50;
+      --light-green: #8bc34a;
+      --dark-green: #1b5e20;
+      --background: #e8f5e9;
+    }
+
+    body {
+      background-color: var(--background);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background-color: var(--dark-green);
+      color: white;
+      padding: 1.5rem 0;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .container {
+      flex: 1;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      color: var(--dark-green);
+      text-decoration: none;
+      font-weight: bold;
+      margin-bottom: 1.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+
+    .back-btn:hover {
+      background-color: rgba(0,0,0,0.05);
+    }
+
+    .back-btn i {
+      margin-right: 0.5rem;
+    }
+
+    .card {
+      background-color: white;
+      border-radius: 8px;
+      padding: 2rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    h1 {
+      color: var(--dark-green);
+      margin-top: 0;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+      color: var(--dark-green);
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 1rem;
+      text-align: center;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 1rem;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 1rem;
+    }
+
+    .btn:hover {
+      background-color: var(--dark-green);
+    }
+
+    .btn-secondary {
+      background-color: #6c757d;
+    }
+
+    .btn-secondary:hover {
+      background-color: #5a6268;
+    }
+
+    #result {
+      margin-top: 2rem;
+      display: none;
+    }
+
+    .booking-info {
+      text-align: left;
+      margin-top: 1.5rem;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 1.5rem;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .info-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .info-label {
+      font-weight: bold;
+      color: var(--dark-green);
+    }
+
+    .status {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: bold;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .status.pending {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+
+    .status.paid {
+      background-color: #cce5ff;
+      color: #004085;
+    }
+
+    .status.confirmed {
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    .status.cancelled {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+
+    .error-message {
+      color: #dc3545;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+    }
+
+    /* Add modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      position: relative;
+      animation: modalFadeIn 0.3s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .modal-icon.success {
+      color: var(--primary-color);
+    }
+
+    .modal-icon.error {
+      color: #dc3545;
+    }
+
+    .booking-details {
+      text-align: left;
+      margin-top: 1rem;
+      background-color: #f8f9fa;
+      border-radius: 6px;
+      padding: 1rem;
+      font-size: 0.95rem;
+    }
+
+    .detail-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .detail-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .detail-label {
+      font-weight: bold;
+      color: var(--dark-green);
+      font-size: 0.9rem;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 0.6rem;
+      border: none;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.9rem;
+    }
+
+    .modal-btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .modal-btn-secondary {
+      background-color: #6c757d;
+      color: white;
+    }
+
+    .modal-btn:hover {
+      opacity: 0.9;
+    }
+
+    .modal h2 {
+      font-size: 1.25rem;
+      margin: 0.5rem 0;
+    }
+
+    .modal p {
+      font-size: 0.9rem;
+      margin: 0.5rem 0;
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      font-size: 1.25rem;
+      padding: 0.25rem;
+    }
+
+    .status {
+      font-size: 0.85rem;
+      padding: 0.25rem 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1><i class="fas fa-search"></i> CEK KODE PEMESANAN</h1>
+    </div>
+  </header>
+
+  <main class="container">
+    <a href="#" class="back-btn" id="backToHomeBtnKode">
+      <i class="fas fa-arrow-left"></i> Kembali ke Beranda
+    </a>
+
+    <div class="card">
+      <div class="form-group">
+        <label for="booking-code">Masukkan Kode Pemesanan</label>
+        <input type="text" id="booking-code" class="form-control" placeholder="Contoh: BOOK-ABC123" maxlength="12">
+      </div>
+
+      <button id="check-btn" class="btn">
+        <i class="fas fa-search"></i> Cek Status
+      </button>
+
+      <div id="result">
+        <h3>Detail Pemesanan</h3>
+        <div class="booking-info" id="booking-info">
+          <!-- Data pemesanan akan ditampilkan di sini -->
+        </div>
+      </div>
+
+      <div id="error-message" class="error-message"></div>
+    </div>
+  </main>
+
+  <div id="bookingModal" class="modal">
+    <div class="modal-content">
+      <button class="close-modal" onclick="closeModal()">&times;</button>
+      <div id="modalIcon" class="modal-icon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <h2 id="modalTitle">Detail Pemesanan</h2>
+      <div id="modalMessage"></div>
+      <div id="bookingDetails" class="booking-details">
+        <!-- Booking details will be inserted here -->
+      </div>
+      <div class="modal-buttons">
+        <button class="modal-btn modal-btn-secondary" onclick="closeModal()">
+          <i class="fas fa-times"></i> Tutup
+        </button>
+        <button id="copyCodeBtn" class="modal-btn modal-btn-primary" onclick="copyBookingCode()" style="display: none;">
+          <i class="fas fa-copy"></i> Salin Kode
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/public/js/main.js"></script>
+  <script>
+    document.getElementById('check-btn').addEventListener('click', checkBooking);
+    document.getElementById('booking-code').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        checkBooking();
+      }
+    });
+
+    function showModal(title, message, isError = false, bookingData = null) {
+      const modal = document.getElementById('bookingModal');
+      const modalIcon = document.getElementById('modalIcon');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalMessage = document.getElementById('modalMessage');
+      const bookingDetails = document.getElementById('bookingDetails');
+      const copyCodeBtn = document.getElementById('copyCodeBtn');
+
+      // Set modal content
+      modalTitle.textContent = title;
+      modalMessage.textContent = message;
+      
+      // Set icon and color based on status
+      modalIcon.innerHTML = isError ? 
+        '<i class="fas fa-exclamation-circle"></i>' : 
+        '<i class="fas fa-check-circle"></i>';
+      modalIcon.className = `modal-icon ${isError ? 'error' : 'success'}`;
+
+      // Show booking details if available
+      if (bookingData) {
+        const formatDate = (dateStr) => {
+          const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+          return new Date(dateStr).toLocaleDateString('id-ID', options);
+        };
+
+        const getStatusText = (status) => {
+          switch(status) {
+            case 'pending': return 'Menunggu Verifikasi';
+            case 'paid': return 'Sudah Bayar (Verifikasi)';
+            case 'confirmed': return 'Terkonfirmasi';
+            case 'cancelled': return 'Dibatalkan';
+            default: return status;
+          }
+        };
+
+        const getStatusClass = (status) => {
+          switch(status) {
+            case 'pending': return 'pending';
+            case 'paid': return 'paid';
+            case 'confirmed': return 'confirmed';
+            case 'cancelled': return 'cancelled';
+            default: return '';
+          }
+        };
+
+        bookingDetails.innerHTML = `
+          <div class="detail-item">
+            <span class="detail-label">Kode Pemesanan:</span>
+            <span>${bookingData.booking_code}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Lapangan:</span>
+            <span>${bookingData.field_name}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Tanggal:</span>
+            <span>${formatDate(bookingData.booking_date)}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Waktu:</span>
+            <span>${bookingData.start_time} - ${bookingData.end_time}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Total Pembayaran:</span>
+            <span>Rp${parseInt(bookingData.total_price).toLocaleString('id-ID')}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Status:</span>
+            <span class="status ${getStatusClass(bookingData.status)}">${getStatusText(bookingData.status)}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Nama Pemesan:</span>
+            <span>${bookingData.customer_name}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Email:</span>
+            <span>${bookingData.customer_email}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">No. Telepon:</span>
+            <span>${bookingData.customer_phone}</span>
+          </div>
+          ${bookingData.payment_proof_path ? `
+            
+          ` : ''}
+        `;
+        bookingDetails.style.display = 'block';
+        copyCodeBtn.style.display = 'block';
+      } else {
+        bookingDetails.style.display = 'none';
+        copyCodeBtn.style.display = 'none';
+      }
+
+      modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('bookingModal');
+      modal.style.display = 'none';
+    }
+
+    function copyBookingCode() {
+      const bookingCode = document.querySelector('#bookingDetails .detail-item:first-child span:last-child').textContent;
+      navigator.clipboard.writeText(bookingCode).then(() => {
+        alert('Kode pemesanan berhasil disalin!');
+      }).catch(err => {
+        console.error('Gagal menyalin kode:', err);
+      });
+    }
+
+    async function checkBooking() {
+      const bookingCode = document.getElementById('booking-code').value.trim().toUpperCase();
+      const errorMessage = document.getElementById('error-message');
+      const resultDiv = document.getElementById('result');
+      
+      // Validasi input
+      if (!bookingCode) {
+        errorMessage.textContent = 'Harap masukkan kode pemesanan';
+        resultDiv.style.display = 'none';
+        return;
+      }
+
+      if (!bookingCode.startsWith('BK') || bookingCode.length < 8) {
+        errorMessage.textContent = 'Format kode tidak valid. Kode harus dimulai dengan "BK"';
+        resultDiv.style.display = 'none';
+        return;
+      }
+
+      errorMessage.textContent = '';
+      
+      try {
+        const response = await fetch(`/api/bookings/${bookingCode}`);
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          showModal(
+            'Detail Pemesanan',
+            'Berikut adalah detail pemesanan Anda:',
+            false,
+            result.data
+          );
+        } else {
+          showModal(
+            'Kode Tidak Ditemukan',
+            result.message || 'Maaf, kode pemesanan yang Anda masukkan tidak ditemukan.',
+            true
+          );
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showModal(
+          'Error',
+          'Terjadi kesalahan saat memeriksa kode pemesanan. Silakan coba lagi.',
+          true
+        );
+      }
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('bookingModal').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) {
+        closeModal();
+      }
+    });
+  </script>
+</body>
+</html>

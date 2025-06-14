@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pemesanan Berhasil</title>
+  <link rel="stylesheet" href="/public/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #2e7d32;
+      --secondary-color: #4caf50;
+      --light-green: #8bc34a;
+      --dark-green: #1b5e20;
+      --background: #e8f5e9;
+    }
+
+    body {
+      background-color: var(--background);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      text-align: center;
+    }
+
+    header {
+      background-color: var(--dark-green);
+      color: white;
+      padding: 1.5rem 0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .container {
+      flex: 1;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .success-icon {
+      font-size: 5rem;
+      color: var(--primary-color);
+      margin-bottom: 1.5rem;
+    }
+
+    h1 {
+      color: var(--dark-green);
+      margin-bottom: 1.5rem;
+    }
+
+    .booking-code {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary-color);
+      margin: 1.5rem 0;
+      padding: 1rem;
+      background-color: #e8f5e9;
+      border-radius: 8px;
+      display: inline-block;
+    }
+
+    .info-text {
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+      max-width: 500px;
+    }
+
+    .btn {
+      display: inline-block;
+      background-color: var(--primary-color);
+      color: white;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-weight: bold;
+      transition: all 0.3s;
+      text-decoration: none;
+      margin-top: 1.5rem;
+    }
+
+    .btn:hover {
+      background-color: var(--dark-green);
+    }
+
+    .steps {
+      text-align: left;
+      margin: 2rem 0;
+      max-width: 500px;
+    }
+
+    .step {
+      display: flex;
+      margin-bottom: 1rem;
+      align-items: flex-start;
+    }
+
+    .step-number {
+      background-color: var(--primary-color);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 1rem;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1><i class="fas fa-check-circle"></i> PEMESANAN BERHASIL</h1>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="success-icon">
+      <i class="fas fa-check-circle"></i>
+    </div>
+
+    <h1>Terima Kasih!</h1>
+    
+    <p class="info-text">
+      Pemesanan lapangan Anda telah berhasil dilakukan. Silakan simpan kode pemesanan di bawah ini untuk keperluan verifikasi.
+    </p>
+
+    <div class="booking-code" id="booking-code-display">
+      BOOK-ABC123
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-number">1</div>
+        <div>Kami telah mengirimkan detail pemesanan ke email Anda. Jika tidak menerima dalam beberapa menit, silakan periksa folder spam.</div>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <div>Admin akan memverifikasi pembayaran Anda dalam waktu 1x24 jam.</div>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <div>Setelah pembayaran diverifikasi, Anda akan menerima email konfirmasi.</div>
+      </div>
+    </div>
+
+    <a href="#" class="btn" id="backToHomeBtnSelesai">
+      <i class="fas fa-home"></i> Kembali ke Beranda
+    </a>
+  </main>
+
+  <script src="/public/js/main.js"></script>
+  <script>
+    // Ambil kode pemesanan dari URL
+    const params = new URLSearchParams(window.location.search);
+    const bookingCode = params.get('code');
+    
+    if (bookingCode) {
+      document.getElementById('booking-code-display').textContent = bookingCode;
+    } else {
+      // Jika tidak ada kode, redirect ke halaman utama
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>

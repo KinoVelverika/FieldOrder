@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - Halaman Tidak Ditemukan</title>
+  <link rel="stylesheet" href="/public/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    .error-container {
+      text-align: center;
+      padding: 50px 20px;
+    }
+    
+    .error-code {
+      font-size: 120px;
+      color: #2e7d32;
+      margin: 0;
+    }
+    
+    .error-message {
+      font-size: 24px;
+      color: #333;
+      margin: 20px 0;
+    }
+    
+    .home-link {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #2e7d32;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+    
+    .home-link:hover {
+      background-color: #1b5e20;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1><i class="fas fa-exclamation-triangle"></i> Halaman Tidak Ditemukan</h1>
+    </div>
+  </header>
+
+  <nav class="navbar">
+    <div class="container">
+      <ul class="admin-nav">
+        <li><a href="/admin/dashboard" class="nav-link" data-page="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+        <li><a href="/admin/ubahjadwal" class="nav-link" data-page="ubahjadwal"><i class="fas fa-calendar-alt"></i> Ubah Jadwal</a></li>
+        <li><a href="/admin/status" class="nav-link" data-page="status"><i class="fas fa-clipboard-list"></i> Status Lapangan</a></li>
+        <li><a href="/admin/riwayat" class="nav-link" data-page="riwayat"><i class="fas fa-history"></i> Riwayat Pemesanan</a></li>
+        <li><a href="/admin/verifikasi" class="nav-link" data-page="verifikasi"><i class="fas fa-check-circle"></i> Verifikasi Pembayaran</a></li>
+        <li><a href="/admin/logout" class="nav-link" data-page="logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="error-container">
+      <h2 class="error-code">404</h2>
+      <p class="error-message">Maaf, halaman yang Anda cari tidak ditemukan.</p>
+      <a href="/admin/dashboard" class="home-link">
+        <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
+      </a>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+     </div>
+  </footer>
+
+  <script src="/public/js/main.js"></script>
+</body>
+</html> 

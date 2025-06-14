@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="/publicAdmin/css/admin.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background-color: #f5f9f7;
+      color: #2c3e50;
+    }
+
+    header {
+      background-color: #27ae60;
+      color: white;
+      padding: 20px 0;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+    }
+
+    .navbar {
+      background: #ffffff;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .admin-nav {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      padding: 15px;
+      list-style: none;
+    }
+
+    .admin-nav .nav-link {
+      background: none;
+      border: none;
+      padding: 10px 15px;
+      font-weight: 500;
+      color: #ffffff;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .admin-nav .nav-link.active,
+    .admin-nav .nav-link:hover {
+      background-color: #2ecc71;
+      color: white;
+      border-radius: 6px;
+    }
+
+    main.container {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+    }
+
+    .form-container, .current-schedule {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.05);
+      padding: 25px;
+      flex: 1 1 48%;
+    }
+
+    .form-container h3,
+    .current-schedule h3 {
+      margin-bottom: 20px;
+      font-size: 1.3rem;
+      color: #27ae60;
+      border-bottom: 2px solid #2ecc71;
+      padding-bottom: 8px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: #27ae60;
+      outline: none;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.3s;
+      font-size: 1rem;
+    }
+
+    .btn-primary {
+      background-color: #2ecc71;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #27ae60;
+    }
+
+    .btn-secondary {
+      background-color: #ecf0f1;
+      color: #2c3e50;
+    }
+
+    .btn-secondary:hover {
+      background-color: #d0d7de;
+    }
+
+    #schedule-list {
+      margin-top: 15px;
+      border-top: 1px solid #eee;
+      padding-top: 10px;
+      font-size: 0.95rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      background-color: #fbfbfb;
+      color: white;
+      margin-top: 60px;
+    }
+
+    @media (max-width: 768px) {
+      main.container {
+        flex-direction: column;
+      }
+
+      .form-container, .current-schedule {
+        flex: 1 1 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1><i class="fas fa-user-shield"></i> Dashboard Admin</h1>
+    </div>
+  </header>
+
+  <nav class="navbar">
+    <div class="container">
+      <ul class="admin-nav">
+        <li><button id="dashboardBtn" class="nav-link active" data-page="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</button></li>
+        <li><button id="ubahjadwalBtn" class="nav-link" data-page="ubahjadwal"><i class="fas fa-calendar-alt"></i> Ubah Jadwal</button></li>
+        <li><button id="statusBtn" class="nav-link" data-page="status"><i class="fas fa-clipboard-list"></i> Status Lapangan</button></li>
+        <li><button id="riwayatBtn" class="nav-link" data-page="riwayat"><i class="fas fa-history"></i> Riwayat Pemesanan</button></li>
+        <!-- <li><button id="verifikasiBtn" class="nav-link" data-page="verifikasi"><i class="fas fa-check-circle"></i> Verifikasi Pembayaran</button></li> -->
+        <li><button id="logoutBtn" class="nav-link" data-page="logout"><i class="fas fa-sign-out-alt"></i> Logout</button></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="container">
+    <a href="/admin" class="back-btn">
+    </a>
+
+    <h2>Ringkasan Sistem</h2>
+    
+    <div class="summary-cards">
+      <div class="summary-card">
+        <i class="fas fa-calendar-check"></i>
+        <h3>Pemesanan Hari Ini</h3>
+        <p id="today-bookings">0</p>
+      </div>
+      
+      <div class="summary-card">
+        <i class="fas fa-clock"></i>
+        <h3>Menunggu Verifikasi</h3>
+        <p id="pending-payments">0</p>
+      </div>
+      
+      <div class="summary-card">
+        <i class="fas fa-check-circle"></i>
+        <h3>Pemesanan Selesai</h3>
+        <p id="completed-bookings">0</p>
+      </div>
+    </div>
+    
+    <div class="recent-activity">
+      <h3>Aktivitas Terkini</h3>
+      <div id="activity-list">
+        <!-- Akan diisi oleh JavaScript -->
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+  </footer>
+
+  <script src="/public/js/main.js"></script>
+</body>
+</html>

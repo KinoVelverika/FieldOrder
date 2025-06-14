@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pembayaran</title>
+  <link rel="stylesheet" href="/public/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #2e7d32;
+      --secondary-color: #4caf50;
+      --light-green: #8bc34a;
+      --dark-green: #1b5e20;
+      --background: #e8f5e9;
+    }
+
+    body {
+      background-color: var(--background);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: var(--dark-green);
+      color: white;
+      padding: 1.5rem 0;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      color: var(--dark-green);
+      text-decoration: none;
+      font-weight: bold;
+      margin-bottom: 1.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+
+    .back-btn:hover {
+      background-color: rgba(0,0,0,0.05);
+    }
+
+    .back-btn i {
+      margin-right: 0.5rem;
+    }
+
+    h1 {
+      color: var(--dark-green);
+      margin-top: 0;
+    }
+
+    .booking-summary {
+      background-color: white;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #eee;
+    }
+
+    .summary-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .summary-label {
+      font-weight: bold;
+      color: var(--dark-green);
+    }
+
+    .total-price {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    .payment-form {
+      background-color: white;
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+      color: var(--dark-green);
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+
+    .upload-area {
+      border: 2px dashed var(--light-green);
+      padding: 2rem;
+      text-align: center;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 1.5rem;
+    }
+
+    .upload-area:hover {
+      background-color: #f1f8e9;
+    }
+
+    .upload-icon {
+      font-size: 2.5rem;
+      color: var(--light-green);
+      margin-bottom: 1rem;
+    }
+
+    .preview-image {
+      max-width: 100%;
+      max-height: 200px;
+      margin-top: 1rem;
+      border-radius: 4px;
+      display: none;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 1rem;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn:hover {
+      background-color: var(--dark-green);
+    }
+
+    .btn:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      margin: 1rem 0;
+    }
+
+    .loading i {
+      color: var(--dark-green);
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+    }
+
+    /* Add these styles for the popup modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 2rem;
+      border-radius: 8px;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      position: relative;
+      animation: modalFadeIn 0.3s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-icon {
+      font-size: 3rem;
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+    }
+
+    .booking-code {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--dark-green);
+      background-color: #f8f9fa;
+      padding: 1rem;
+      border-radius: 4px;
+      margin: 1rem 0;
+      letter-spacing: 2px;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .modal-btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .modal-btn-secondary {
+      background-color: #6c757d;
+      color: white;
+    }
+
+    .modal-btn:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1><i class="fas fa-credit-card"></i> PEMBAYARAN</h1>
+    </div>
+  </header>
+
+  <main class="container">
+    <a href="#" class="back-btn" id="backToPesanBtn">
+      <i class="fas fa-arrow-left"></i> Kembali
+    </a>
+
+    <div class="booking-summary">
+      <h2>Ringkasan Pemesanan</h2>
+      <div class="summary-item">
+        <span class="summary-label">Lapangan:</span>
+        <span id="field-name">-</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Tanggal:</span>
+        <span id="booking-date">-</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Waktu:</span>
+        <span id="booking-time">-</span>
+      </div>
+      <div class="summary-item total-price">
+        <span class="summary-label">Total Pembayaran:</span>
+        <span id="total-price">Rp0</span>
+      </div>
+    </div>
+
+    <form id="payment-form" class="payment-form">
+      <h2>Data Pemesan</h2>
+      <div class="form-group">
+        <label for="customer_name">Nama Lengkap</label>
+        <input type="text" id="customer_name" name="customer_name" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label for="customer_email">Email</label>
+        <input type="email" id="customer_email" name="customer_email" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label for="customer_phone">Nomor Telepon</label>
+        <input type="tel" id="customer_phone" name="customer_phone" class="form-control" required>
+      </div>
+
+      <h2>Upload Bukti Pembayaran</h2>
+      <div class="form-group">
+        <input type="file" id="payment_proof" name="payment_proof" accept="image/*" style="display: none;">
+        <div class="upload-area" id="upload-area">
+          <div class="upload-icon">
+            <i class="fas fa-cloud-upload-alt"></i>
+          </div>
+          <p>Klik untuk mengunggah bukti pembayaran</p>
+          <p><small>(Format: JPG, PNG, maksimal 2MB)</small></p>
+          <img id="preview-img" class="preview-image" alt="Preview Bukti Pembayaran">
+        </div>
+      </div>
+
+      <div class="loading" id="loading">
+        <i class="fas fa-spinner fa-spin"></i> Memproses pembayaran...
+      </div>
+
+      <button type="submit" id="submit-btn" class="btn">
+        <i class="fas fa-paper-plane"></i> Kirim Pembayaran
+      </button>
+    </form>
+  </main>
+
+  <!-- Add this modal HTML before the closing body tag -->
+  <div id="successModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-icon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <h2>Pembayaran Berhasil!</h2>
+      <p>Pemesanan Anda telah berhasil dibuat. Silakan simpan kode pemesanan berikut:</p>
+      <div class="booking-code" id="modalBookingCode"></div>
+      <p><small>Kode ini akan digunakan untuk mengecek status pemesanan Anda.</small></p>
+      <div class="modal-buttons">
+        <button class="modal-btn modal-btn-secondary" onclick="copyBookingCode()">
+          <i class="fas fa-copy"></i> Salin Kode
+        </button>
+        <button class="modal-btn modal-btn-primary" onclick="window.location.href='kode.html'">
+          <i class="fas fa-search"></i> Cek Status
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/public/js/main.js"></script>
+  <script>
+    // Ambil parameter dari URL
+    const params = new URLSearchParams(window.location.search);
+    
+    // Validasi parameter yang diperlukan
+    const requiredParams = ['field_name', 'date', 'start_time', 'end_time', 'price'];
+    const missingParams = requiredParams.filter(param => !params.get(param));
+    
+    if (missingParams.length > 0) {
+      // Jika ada parameter yang hilang, redirect ke halaman pesan
+      window.location.href = '/pesan';
+    } else {
+      // Format tanggal ke format Indonesia
+      const bookingDate = new Date(params.get('date'));
+      const formattedDate = bookingDate.toLocaleDateString('id-ID', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+      
+      // Tampilkan info pemesanan
+      document.getElementById('field-name').textContent = params.get('field_name');
+      document.getElementById('booking-date').textContent = formattedDate;
+      document.getElementById('booking-time').textContent = `${params.get('start_time')} - ${params.get('end_time')}`;
+      document.getElementById('total-price').textContent = `Rp${parseInt(params.get('price')).toLocaleString('id-ID')}`;
+    }
+
+    // Handle upload bukti pembayaran
+    const paymentProof = document.getElementById('payment_proof');
+    const uploadArea = document.getElementById('upload-area');
+    const previewImg = document.getElementById('preview-img');
+
+    uploadArea.addEventListener('click', () => {
+      paymentProof.click();
+    });
+
+    paymentProof.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        // Validasi ukuran file
+        if (file.size > 2 * 1024 * 1024) {
+          alert('Ukuran file terlalu besar. Maksimal 2MB.');
+          paymentProof.value = '';
+          return;
+        }
+
+        // Validasi tipe file
+        if (!file.type.match('image.*')) {
+          alert('Hanya file gambar yang diperbolehkan.');
+          paymentProof.value = '';
+          return;
+        }
+
+        // Tampilkan preview
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          previewImg.src = event.target.result;
+          previewImg.style.display = 'block';
+          uploadArea.querySelector('p').textContent = file.name;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Add these new functions
+    function showSuccessModal(bookingCode) {
+      const modal = document.getElementById('successModal');
+      const modalBookingCode = document.getElementById('modalBookingCode');
+      modalBookingCode.textContent = bookingCode;
+      modal.style.display = 'flex';
+    }
+
+    function copyBookingCode() {
+      const bookingCode = document.getElementById('modalBookingCode').textContent;
+      navigator.clipboard.writeText(bookingCode).then(() => {
+        alert('Kode pemesanan berhasil disalin!');
+      }).catch(err => {
+        console.error('Gagal menyalin kode:', err);
+      });
+    }
+
+    // Modify the form submission handler
+    document.getElementById('payment-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const customer_name = document.getElementById('customer_name').value.trim();
+      const customer_email = document.getElementById('customer_email').value.trim();
+      const customer_phone = document.getElementById('customer_phone').value.trim();
+      const file = document.getElementById('payment_proof').files[0];
+
+      // Validasi form
+      if (!customer_name || !customer_email || !customer_phone || !file) {
+        alert('Harap lengkapi semua data dan unggah bukti pembayaran');
+        return;
+      }
+
+      // Validasi email
+      if (!/^\S+@\S+\.\S+$/.test(customer_email)) {
+        alert('Format email tidak valid');
+        return;
+      }
+
+      // Tampilkan loading
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('submit-btn').disabled = true;
+
+      try {
+        // Buat FormData
+        const formData = new FormData();
+        formData.append('customer_name', customer_name);
+        formData.append('customer_email', customer_email);
+        formData.append('customer_phone', customer_phone);
+        formData.append('field_name', params.get('field_name'));
+        formData.append('booking_date', params.get('date'));
+        formData.append('start_time', params.get('start_time'));
+        formData.append('end_time', params.get('end_time'));
+        formData.append('total_price', params.get('price'));
+        formData.append('schedule_id', params.get('schedule_id'));
+        formData.append('payment_proof', file);
+
+        // Debug: Log form data
+        console.log('Sending form data:', {
+          customer_name,
+          customer_email,
+          customer_phone,
+          field_name: params.get('field_name'),
+          booking_date: params.get('date'),
+          start_time: params.get('start_time'),
+          end_time: params.get('end_time'),
+          total_price: params.get('price'),
+          schedule_id: params.get('schedule_id')
+        });
+
+        // Kirim data ke server
+        const response = await fetch('/api/bookings', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          // Tampilkan modal dengan kode booking
+          showSuccessModal(result.booking_code);
+        } else {
+          throw new Error(result.message || 'Gagal membuat pemesanan');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert(error.message || 'Terjadi kesalahan saat membuat pemesanan');
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('submit-btn').disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
